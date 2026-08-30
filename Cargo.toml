@@ -1,0 +1,28 @@
+[package]
+name = "barbican"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "Authentication and authorization middleware for Axum — extractors, role-based guards, and public path bypass"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/WyattAu/barbican"
+
+[dependencies]
+axum = "0.8"
+axum-extra = "0.10"
+tower = "0.5"
+tower-layer = "0.3"
+http = "1"
+serde = "1"
+serde_json = "1"
+thiserror = "2"
+tracing = "0.1"
+
+[dependencies.tokenkit]
+path = "../tokenkit"
+optional = true
+
+[features]
+default = ["extractors", "tokenkit"]
+extractors = []
+tokenkit = ["dep:tokenkit"]
