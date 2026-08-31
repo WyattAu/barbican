@@ -24,6 +24,9 @@ pin-project-lite = "0.2"
 path = "../tokenkit"
 optional = true
 
+[dev-dependencies]
+proptest = "1"
+
 [features]
 default = ["extractors", "tokenkit"]
 extractors = []
