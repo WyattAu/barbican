@@ -1,4 +1,5 @@
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 //! Authentication and authorization middleware for Axum.
 //!
@@ -6,10 +7,11 @@
 //! utilities for building secure Axum applications.
 
 mod error;
-
-#[cfg(feature = "extractors")]
-pub mod extractors;
-pub mod middleware;
-pub mod path;
+mod extractors;
+mod middleware;
+mod path;
 
 pub use error::AuthRejection;
+pub use extractors::{BearerToken, Claims, OptionalAuth};
+pub use middleware::{auth_middleware_fn, require_permission_fn};
+pub use path::{is_public_path, public_path_bypass};

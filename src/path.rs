@@ -33,7 +33,7 @@ pub fn is_public_path(path: &str, public_prefixes: &[&str]) -> bool {
 /// ```
 pub fn public_path_bypass<S>(
     public_prefixes: Vec<&'static str>,
-    mut inner: S,
+    inner: S,
 ) -> impl Service<Request<Body>, Response = Response, Error = S::Error>
 where
     S: Service<Request<Body>, Response = Response> + Clone + Send + 'static,
