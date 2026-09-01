@@ -6,6 +6,8 @@ rust-version = "1.85"
 description = "Authentication and authorization middleware for Axum — extractors, role-based guards, and public path bypass"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/WyattAu/barbican"
+keywords = ["auth", "axum", "middleware"]
+categories = ["web-programming"]
 exclude = ["/target"]
 
 [dependencies]
