@@ -6,6 +6,7 @@ rust-version = "1.85"
 description = "Authentication and authorization middleware for Axum — extractors, role-based guards, and public path bypass"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/WyattAu/barbican"
+exclude = ["/target"]
 
 [dependencies]
 axum = "0.8"
@@ -21,11 +22,17 @@ tracing = "0.1"
 pin-project-lite = "0.2"
 
 [dependencies.tokenkit]
+version = "0.1.0"
 path = "../tokenkit"
 optional = true
 
+[[bench]]
+name = "barbican_bench"
+harness = false
+
 [dev-dependencies]
 proptest = "1"
+criterion = { version = "0.5", features = ["html_reports"] }
 
 [features]
 default = ["extractors", "tokenkit"]
