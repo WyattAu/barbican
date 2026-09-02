@@ -9,12 +9,12 @@ use crate::error::AuthRejection;
 pub fn auth_middleware_fn<F, Fut>(
     validate: F,
 ) -> impl Fn(
-        State<()>,
-        Request<Body>,
-        axum::middleware::Next,
-    ) -> std::pin::Pin<
-        Box<dyn std::future::Future<Output = Result<Response, AuthRejection>> + Send>,
-    > + Clone
+    State<()>,
+    Request<Body>,
+    axum::middleware::Next,
+) -> std::pin::Pin<
+    Box<dyn std::future::Future<Output = Result<Response, AuthRejection>> + Send>,
+> + Clone
 where
     F: Fn(String) -> Fut + Clone + Send + Sync + 'static,
     Fut: std::future::Future<Output = Result<(), AuthRejection>> + Send + 'static,

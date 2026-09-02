@@ -1,7 +1,7 @@
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use criterion::{criterion_group, criterion_main, Criterion};
 use barbican::{AuthRejection, is_public_path};
+use criterion::{Criterion, criterion_group, criterion_main};
 
 fn bench_auth_rejection_missing_credentials(c: &mut Criterion) {
     c.bench_function("auth_rejection_missing_credentials", |b| {
@@ -46,7 +46,14 @@ fn bench_is_public_path_no_match(c: &mut Criterion) {
 }
 
 fn bench_is_public_path_long_path(c: &mut Criterion) {
-    let prefixes = &["/health", "/metrics", "/api/docs", "/public", "/static", "/assets"];
+    let prefixes = &[
+        "/health",
+        "/metrics",
+        "/api/docs",
+        "/public",
+        "/static",
+        "/assets",
+    ];
     let long_path = "/api/v1/very/deeply/nested/resource/with/many/segments";
     c.bench_function("is_public_path_long_path", |b| {
         b.iter(|| is_public_path(long_path, prefixes));

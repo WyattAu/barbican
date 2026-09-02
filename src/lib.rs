@@ -82,15 +82,13 @@ mod proptest_tests {
     use proptest::prelude::*;
 
     fn arb_auth_rejection() -> impl Strategy<Value = super::error::AuthRejection> {
-        prop_oneof![
-            (0u8..5u8).prop_map(|v| match v {
-                0 => super::error::AuthRejection::MissingCredentials,
-                1 => super::error::AuthRejection::TokenExpired,
-                2 => super::error::AuthRejection::TokenRevoked,
-                3 => super::error::AuthRejection::InvalidToken("test".into()),
-                _ => super::error::AuthRejection::InsufficientPermissions("test".into()),
-            }),
-        ]
+        prop_oneof![(0u8..5u8).prop_map(|v| match v {
+            0 => super::error::AuthRejection::MissingCredentials,
+            1 => super::error::AuthRejection::TokenExpired,
+            2 => super::error::AuthRejection::TokenRevoked,
+            3 => super::error::AuthRejection::InvalidToken("test".into()),
+            _ => super::error::AuthRejection::InsufficientPermissions("test".into()),
+        }),]
     }
 
     proptest! {
