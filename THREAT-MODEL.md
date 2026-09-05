@@ -25,15 +25,26 @@ configuration the integrator assembles (which routes get the auth layer).
 | T2 | Invalid/expired/revoked token accepted | Spoofing | `Claims<C>` extractor | Decoding delegated to `tokenkit::JwtService`; error mapped to typed rejections — `Expired`/`Revoked`/`InvalidSignature` → 401 | `src/lib.rs::invalid_token_status_401`, `display_messages_contain_expected_text`; proptest `auth_rejection_status_codes` |
 | T3 | Forged `AuthRejection` status (error confusion) | Tampering | `AuthRejection::into_response` | Exhaustive mapping: only 401/403 statuses possible | proptest `auth_rejection_status_codes` (asserts no other status escapes) |
 | T4 | Arbitrary header bytes crash extraction | DoS | `BearerToken` extraction | `to_str()` failure and prefix mismatch both yield typed rejection, never panic; `#![forbid(unsafe_code)]` | proptest `bearer_token_extraction` (adversarial token charset `[a-zA-Z0-9._-]{1,200}`); extractor error paths |
-| T5 | Public-path bypass abused on protected routes | Elevation | `is_public_path` | Prefix list is explicit; middleware ordering is integrator-owned (documented: bypass layer only on public routes) | `src/lib.rs::public_paths`, `non_public_paths`; proptest `is_public_path` |
+| T5 | Public-path bypass abused on protected routes | Elevation | `is_public_path` | Segment-boundary matching (REQ-BARBICAN-100): a public entry matches itself and its subtree only — text-prefix sharing (`/healthcheck` vs `/health`) does NOT bypass auth; middleware ordering is integrator-owned (documented: bypass layer only on public routes) | `src/lib.rs::req_barbican_100_text_prefix_sharing_is_not_public`, `public_paths`, `non_public_paths`, `req_barbican_100_input_is_path_component_query_not_split`; proptests `is_public_path_exact_and_subtree`, `is_public_path_no_text_prefix_over_match` |
 | T6 | Auth failure detail oracle / token echo | Info disclosure | `AuthRejection::InvalidToken` | Token itself is never echoed; `InvalidSignature` case sends fixed "Invalid signature" text | `display_messages_contain_expected_text` (fixed strings asserted) |
+
+## CLOSED RISKS (mitigated — cited by tests)
+
+- **CLOSED-1 (was OPEN-1) — `is_public_path` raw-prefix over-match** —
+  closed in **0.2.0** (REQ-BARBICAN-100). Matching is now segment-boundary:
+  a public entry matches itself and its subtree (`/health`, `/health/`,
+  `/health/detail`) but NOT text-prefix impostors (`/healthcheck`,
+  `/healthz-admin`). The bypass class is pinned by
+  `src/lib.rs::req_barbican_100_text_prefix_sharing_is_not_public` and the
+  adversarial proptest `is_public_path_no_text_prefix_over_match` (arbitrary
+  suffix text glued to a public prefix must stay non-public). Residual:
+  the function receives the path component only; callers passing raw URIs
+  with queries fail closed (contract test
+  `req_barbican_100_input_is_path_component_query_not_split`), and Axum
+  layer ordering remains integrator-owned (see Residual Risks).
 
 ## OPEN RISKS (missing mitigations — not fabricated)
 
-- **OPEN-1 — `is_public_path` matches on raw prefix with no boundary
-  check.** Listing `/health` makes `/healthcheck` (or `/health/../admin`,
-  pre-normalization) public. A segment-aware match or trailing-slash
-  convention is needed; no test pins the over-match behavior.
 - **OPEN-2 — `InvalidToken(other.to_string())` forwards the underlying
   `JwtError` text into the JSON response body** (`src/error.rs`
   `into_response`). Tokenkit decode errors embed `jsonwebtoken` internals —

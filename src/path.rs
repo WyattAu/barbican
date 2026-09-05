@@ -3,20 +3,45 @@ use axum::http::Request;
 use axum::response::Response;
 use tower::Service;
 
-/// Checks whether a given path should bypass authentication.
+/// REQ-BARBICAN-100: Checks whether a given path should bypass authentication.
 ///
-/// Paths are considered public if they match any of the provided prefixes.
+/// Matching is **segment-boundary** — a public entry matches itself and its
+/// subtree only:
+///
+/// - exact match: `/health` matches `/health`
+/// - subtree: `/health` matches `/health/` and `/health/detail`
+/// - **no text-prefix over-match**: `/health` does NOT match `/healthcheck`
+///   or `/healthz-admin` — a path merely sharing a text prefix with a public
+///   entry still requires authentication.
+///
+/// `path` must be the **path component only** (e.g. `Uri::path()`), without
+/// scheme, authority, or query. Axum's `Uri::path()` never includes the
+/// query string, so the usual integration is safe; a caller passing a raw
+/// query-bearing string gets no match (queries are not split here).
 ///
 /// # Example
 ///
-/// ```ignore
-/// assert!(is_public_path("/health", &["/health", "/metrics"]));
-/// assert!(is_public_path("/api/v1/users", &["/health"]));
+/// ```
+/// use barbican::is_public_path;
+///
+/// let public = ["/health", "/metrics"];
+///
+/// // exact
+/// assert!(is_public_path("/health", &public));
+/// // trailing slash — subtree
+/// assert!(is_public_path("/health/", &public));
+/// // subtree
+/// assert!(is_public_path("/health/detail", &public));
+/// // text-prefix sharing is NOT public — auth is enforced
+/// assert!(!is_public_path("/healthcheck", &public));
+/// assert!(!is_public_path("/healthz-admin", &public));
+/// assert!(!is_public_path("/api/v1/users", &public));
 /// ```
 pub fn is_public_path(path: &str, public_prefixes: &[&str]) -> bool {
-    public_prefixes
-        .iter()
-        .any(|prefix| path.starts_with(prefix))
+    public_prefixes.iter().any(|&prefix| {
+        path == prefix
+            || (path.starts_with(prefix) && path.as_bytes().get(prefix.len()) == Some(&b'/'))
+    })
 }
 
 /// Middleware that bypasses authentication for public paths.

@@ -61,8 +61,14 @@ mod tests {
     #[test]
     fn public_paths() {
         let prefixes = &["/health", "/api/docs"];
+        // exact
         assert!(is_public_path("/health", prefixes));
         assert!(is_public_path("/api/docs", prefixes));
+        // trailing slash — subtree of the entry
+        assert!(is_public_path("/health/", prefixes));
+        assert!(is_public_path("/api/docs/", prefixes));
+        // subtree
+        assert!(is_public_path("/health/detail", prefixes));
         assert!(is_public_path("/api/docs/something", prefixes));
     }
 
@@ -72,6 +78,28 @@ mod tests {
         assert!(!is_public_path("/api/users", prefixes));
         assert!(!is_public_path("/protected", prefixes));
         assert!(!is_public_path("/", prefixes));
+    }
+
+    #[test]
+    fn req_barbican_100_text_prefix_sharing_is_not_public() {
+        // The bypass class OPEN-1 was closed for: routes that merely START
+        // with a public prefix must NOT be classified public.
+        let prefixes = &["/health", "/api/docs"];
+        assert!(!is_public_path("/healthcheck", prefixes));
+        assert!(!is_public_path("/healthz-admin", prefixes));
+        assert!(!is_public_path("/healthcheck/deep", prefixes));
+        assert!(!is_public_path("/api/docsx", prefixes));
+        assert!(!is_public_path("/api/docs-v2/item", prefixes));
+    }
+
+    #[test]
+    fn req_barbican_100_input_is_path_component_query_not_split() {
+        // Contract: `is_public_path` receives the path component only
+        // (axum's `Uri::path()` never carries a query). The function does
+        // not split queries, so a caller passing one gets no match —
+        // fail-closed. Pinned so the contract can't silently change.
+        let prefixes = &["/health"];
+        assert!(!is_public_path("/health?x=1", prefixes));
     }
 }
 
@@ -100,9 +128,24 @@ mod proptest_tests {
         }
 
         #[test]
-        fn is_public_path(public_prefix in "/[a-z]{1,10}", suffix in "[a-z/]{0,20}") {
-            let full_path = format!("{}{}", public_prefix, suffix);
-            prop_assert!(super::path::is_public_path(&full_path, &[&public_prefix]));
+        fn is_public_path_exact_and_subtree(public_prefix in "/[a-z]{1,10}", sub in "[a-z/]{0,19}") {
+            let prefixes = &[public_prefix.as_str()];
+            // exact match is public
+            prop_assert!(super::path::is_public_path(public_prefix.as_str(), prefixes));
+            // subtree (prefix + segment boundary) is public
+            let subtree = format!("{public_prefix}/{sub}");
+            prop_assert!(super::path::is_public_path(&subtree, prefixes));
+        }
+
+        #[test]
+        fn is_public_path_no_text_prefix_over_match(
+            public_prefix in "/[a-z]{1,10}",
+            tail in "[a-z]{1,10}",
+        ) {
+            // REQ-BARBICAN-100: a path sharing a text prefix with a public
+            // entry (no '/' at the boundary) must NOT be public.
+            let impostor = format!("{public_prefix}{tail}");
+            prop_assert!(!super::path::is_public_path(&impostor, &[&public_prefix]));
         }
 
         #[test]
