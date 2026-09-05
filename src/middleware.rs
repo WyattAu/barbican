@@ -5,16 +5,14 @@ use axum::response::Response;
 
 use crate::error::AuthRejection;
 
+/// Boxed future returned by the auth middleware closure.
+pub type AuthFuture =
+    std::pin::Pin<Box<dyn std::future::Future<Output = Result<Response, AuthRejection>> + Send>>;
+
 /// Creates an auth middleware function for `axum::middleware::from_fn_with_state`.
 pub fn auth_middleware_fn<F, Fut>(
     validate: F,
-) -> impl Fn(
-    State<()>,
-    Request<Body>,
-    axum::middleware::Next,
-) -> std::pin::Pin<
-    Box<dyn std::future::Future<Output = Result<Response, AuthRejection>> + Send>,
-> + Clone
+) -> impl Fn(State<()>, Request<Body>, axum::middleware::Next) -> AuthFuture + Clone
 where
     F: Fn(String) -> Fut + Clone + Send + Sync + 'static,
     Fut: std::future::Future<Output = Result<(), AuthRejection>> + Send + 'static,
