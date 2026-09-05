@@ -96,3 +96,7 @@ async fn my_handler(BearerToken(claims): BearerToken<Claims>) -> String {
 ## License
 
 MIT OR Apache-2.0
+
+## Security
+
+Threat model: [THREAT-MODEL.md](THREAT-MODEL.md).
