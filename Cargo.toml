@@ -24,8 +24,7 @@ tracing = "0.1"
 pin-project-lite = "0.2"
 
 [dependencies.tokenkit]
-version = "0.1.0"
-path = "../tokenkit"
+version = "0.1"
 optional = true
 
 [[bench]]
