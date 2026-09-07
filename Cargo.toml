@@ -1,6 +1,6 @@
 [package]
 name = "barbican"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 rust-version = "1.85"
 description = "Authentication and authorization middleware for Axum — extractors, role-based guards, and public path bypass"
@@ -25,6 +25,8 @@ pin-project-lite = "0.2"
 
 [dependencies.tokenkit]
 version = "0.1"
+git = "https://github.com/WyattAu/tokenkit"
+tag = "v0.1.1"
 optional = true
 
 [[bench]]

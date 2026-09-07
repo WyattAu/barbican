@@ -121,7 +121,7 @@ dependencies = [
 
 [[package]]
 name = "barbican"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "axum",
  "axum-extra",
@@ -1284,8 +1284,7 @@ dependencies = [
 [[package]]
 name = "tokenkit"
 version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "420028108ec323158bc362a0ae53a5606b0f2c1fbd98fadd3e8e71034a120e4f"
+source = "git+https://github.com/WyattAu/tokenkit?tag=v0.1.1#f2689b29ac8d95cc71c6c4a48bd2087f35339538"
 dependencies = [
  "chrono",
  "jsonwebtoken",
