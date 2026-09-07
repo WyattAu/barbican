@@ -133,6 +133,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tokenkit",
+ "tokio",
  "tower",
  "tower-layer",
  "tower-service",
