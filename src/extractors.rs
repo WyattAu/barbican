@@ -29,6 +29,7 @@ impl<S: Send + Sync> FromRequestParts<S> for BearerToken {
 pub struct Claims<C>(pub C);
 
 #[cfg(feature = "tokenkit")]
+#[cfg_attr(docsrs, doc(cfg(feature = "tokenkit")))]
 impl<C, S> FromRequestParts<S> for Claims<C>
 where
     C: DeserializeOwned + Send + 'static,
@@ -55,6 +56,7 @@ where
 pub struct OptionalAuth<C>(pub Option<C>);
 
 #[cfg(feature = "tokenkit")]
+#[cfg_attr(docsrs, doc(cfg(feature = "tokenkit")))]
 impl<C, S> FromRequestParts<S> for OptionalAuth<C>
 where
     C: DeserializeOwned + Send + 'static,
