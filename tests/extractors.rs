@@ -3,6 +3,7 @@
 //! Each test drives the extractor through `axum::extract::FromRequestParts`
 //! with a real `Arc<JwtService>` in state and asserts on the extracted
 //! value or the exact `AuthRejection` variant returned.
+#![cfg(feature = "tokenkit")]
 
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};

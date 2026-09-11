@@ -1,6 +1,10 @@
-use axum::extract::{FromRef, FromRequestParts};
+#[cfg(feature = "tokenkit")]
+use axum::extract::FromRef;
+use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
+#[cfg(feature = "tokenkit")]
 use serde::de::DeserializeOwned;
+#[cfg(feature = "tokenkit")]
 use std::sync::Arc;
 
 use crate::error::AuthRejection;

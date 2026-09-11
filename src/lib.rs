@@ -106,6 +106,7 @@ mod tests {
 }
 
 #[cfg(test)]
+#[cfg(feature = "tokenkit")]
 mod proptest_tests {
     use axum::http::StatusCode;
     use axum::response::IntoResponse;
