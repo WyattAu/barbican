@@ -5,7 +5,7 @@
 [![crates.io](https://img.shields.io/crates/v/barbican.svg)](https://crates.io/crates/barbican)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE)
 
-Authentication and authorization middleware for Axum — extractors, role-based guards, and public path bypass.
+Authentication and authorization middleware for Axum; extractors, role-based guards, and public path bypass.
 
 ## Purpose
 
